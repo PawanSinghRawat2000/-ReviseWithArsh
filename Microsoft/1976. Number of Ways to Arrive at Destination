@@ -1,0 +1,34 @@
+#define ll long long
+class Solution {
+public:
+    int MOD = 1e9 + 7;
+    int countPaths(int n, vector<vector<int>>& roads) {
+        vector<vector<pair<ll,ll>>> graph(n);
+        for(auto& road: roads) {
+            ll u = road[0], v = road[1], time = road[2];
+            graph[u].push_back({v, time});
+            graph[v].push_back({u, time});
+        }
+        vector<ll> dist(n, LONG_MAX);
+        vector<ll> ways(n);
+        ways[0] = 1;
+        dist[0] = 0;
+        priority_queue<pair<ll,ll>, vector<pair<ll,ll>>, greater<>> minHeap;
+        minHeap.push({0, 0}); // dist, src
+        while (!minHeap.empty()) {
+            ll d=minHeap.top().first,u=minHeap.top().second;
+            minHeap.pop();
+            if (d > dist[u]) continue; // Skip if `d` is not updated to latest version!
+            for(auto [v, time] : graph[u]) {
+                if (dist[v] > d + time) {
+                    dist[v] = d + time;
+                    ways[v] = ways[u];
+                    minHeap.push({dist[v], v});
+                } else if (dist[v] == d + time) {
+                    ways[v] = (ways[v] + ways[u]) % MOD;
+                }
+            }
+        }
+        return ways[n-1];
+    }
+};
